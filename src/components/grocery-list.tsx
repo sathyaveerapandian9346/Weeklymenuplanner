@@ -44,9 +44,10 @@ function groupByCategory(ingredients: AggregatedIngredient[]): Map<string, Aggre
     if (!map.has(cat)) map.set(cat, [])
     map.get(cat)!.push(ing)
   }
-  for (const list of map.values()) {
+  Array.from(map.values()).forEach((list) => {
     list.sort((a, b) => a.name.localeCompare(b.name))
-  }
+  });
+
   const sorted = new Map<string, AggregatedIngredient[]>()
   for (const label of order) {
     if (map.has(label)) sorted.set(label, map.get(label)!)
@@ -260,32 +261,16 @@ export function GroceryList() {
   function printList() {
     if (ingredients.length === 0) return
     const weekRange = `${format(weekStart, "MMM d")} – ${format(addDays(weekStart, 6), "MMM d, yyyy")}`
-    const groups = groupByCategory(ingredients)
-    let tablesHtml = ""
-    for (const [category, items] of groups.entries()) {
-      const rows = items
-        .map(
-          (ing) =>
-            `<tr>
-              <td style="border-bottom: 1px solid #ddd; padding: 8px 12px; width: 40px;">☐</td>
-              <td style="border-bottom: 1px solid #ddd; padding: 8px 12px;">${ing.name}</td>
-              <td style="border-bottom: 1px solid #ddd; padding: 8px 12px; text-align: right;">${formatAmount(ing.amount, ing.unit)}</td>
-            </tr>`
-        )
-        .join("")
-      tablesHtml += `
-  <h2 style="font-size: 14px; font-weight: 700; margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.05em;">${category}</h2>
-  <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
-    <thead>
-      <tr>
-        <th style="text-align: left; border-bottom: 2px solid #000; padding: 8px 12px; width: 40px;"></th>
-        <th style="text-align: left; border-bottom: 2px solid #000; padding: 8px 12px;">Item</th>
-        <th style="text-align: right; border-bottom: 2px solid #000; padding: 8px 12px;">Quantity</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>`
-    }
+    const listItems = ingredients
+      .map(
+        (ing) =>
+          `<tr>
+            <td style="border-bottom: 1px solid #ddd; padding: 8px 12px; width: 40px;">☐</td>
+            <td style="border-bottom: 1px solid #ddd; padding: 8px 12px;">${ing.name}</td>
+            <td style="border-bottom: 1px solid #ddd; padding: 8px 12px; text-align: right;">${formatAmount(ing.amount, ing.unit)}</td>
+          </tr>`
+      )
+      .join("")
 
     const printHtml = `<!DOCTYPE html>
 <html>
@@ -297,12 +282,23 @@ export function GroceryList() {
     body { font-family: system-ui, -apple-system, sans-serif; color: #000; background: #fff; padding: 24px; }
     h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
     .week { font-size: 14px; color: #333; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
     @media print { body { padding: 16px; } }
   </style>
 </head>
 <body>
   <h1>Grocery List</h1>
-  <p class="week">Week of ${weekRange}</p>${tablesHtml}
+  <p class="week">Week of ${weekRange}</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align: left; border-bottom: 2px solid #000; padding: 8px 12px; width: 40px;"></th>
+        <th style="text-align: left; border-bottom: 2px solid #000; padding: 8px 12px;">Item</th>
+        <th style="text-align: right; border-bottom: 2px solid #000; padding: 8px 12px;">Quantity</th>
+      </tr>
+    </thead>
+    <tbody>${listItems}</tbody>
+  </table>
 </body>
 </html>`
 
